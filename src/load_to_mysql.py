@@ -1,6 +1,9 @@
 import pandas as pd
 import mysql.connector
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 
 # -----------------------------
 # LOAD DATA
@@ -20,10 +23,10 @@ print("Columns:", len(df.columns))
 # -----------------------------
 
 connection = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="Gayathri@123",
-    database="sales_analytics"
+    host=os.getenv("DB_HOST"),
+    user=os.getenv("DB_USER"),
+    password=os.getenv("DB_PASSWORD"),
+    database=os.getenv("DB_NAME")
 )
 
 cursor = connection.cursor()
@@ -32,7 +35,6 @@ print("Connected to MySQL successfully!")
 # -----------------------------
 # INSERT DATA INTO MYSQL
 # -----------------------------
-
 insert_query = """
 INSERT INTO sales (
     Order_ID,
@@ -48,6 +50,17 @@ INSERT INTO sales (
     Profit
 )
 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+ON DUPLICATE KEY UPDATE
+    Order_Date = VALUES(Order_Date),
+    Customer_ID = VALUES(Customer_ID),
+    Product = VALUES(Product),
+    Region = VALUES(Region),
+    Quantity = VALUES(Quantity),
+    Unit_Price = VALUES(Unit_Price),
+    Discount = VALUES(Discount),
+    Category = VALUES(Category),
+    Sales = VALUES(Sales),
+    Profit = VALUES(Profit)
 """
 
 for _, row in df.iterrows():
